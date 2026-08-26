@@ -1,27 +1,33 @@
 from ucimlrepo import fetch_ucirepo
 
-# Fetch Student Performance dataset
+# Fetch dataset
 student_performance = fetch_ucirepo(id=320)
 
-# Features and target
-X = student_performance.data.features
-y = student_performance.data.targets
+# Get features and target data
+features_data = student_performance.data.features
+target_data = student_performance.data.targets
 
-print("Features:")
+# Select features
+X = features_data[
+    [
+        "studytime",
+        "failures",
+        "absences"
+    ]
+].copy()
+
+# G1 and G2 are present in target_data
+X["G1"] = target_data["G1"]
+X["G2"] = target_data["G2"]
+
+# Final grade is our target
+y = target_data["G3"]
+
+print("Selected Features:")
 print(X.head())
 
-print("\nTarget:")
+print("\nTarget (G3):")
 print(y.head())
 
 print("\nDataset Shape:")
 print(X.shape)
-
-
-print("\nAll Features:")
-print(X.columns.tolist())
-
-print("\nMissing Values:")
-print(X.isnull().sum())
-
-print("\nTarget Information:")
-print(y.describe())
