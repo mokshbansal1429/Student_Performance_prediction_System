@@ -3,6 +3,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import pandas as pd
+import joblib
 
 # =====================================================
 # STEP 1 : Load Dataset
@@ -106,3 +107,5 @@ predicted_grade = model.predict(sample_student)
 print("\n========== SAMPLE STUDENT ==========")
 print(sample_student)
 print(f"\nPredicted Final Grade (G3): {predicted_grade[0]:.2f}")
+model_path = "model/performance_model.pkl"
+joblib.dump(model, model_path)
