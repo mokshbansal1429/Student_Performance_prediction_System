@@ -1,90 +1,108 @@
 from ucimlrepo import fetch_ucirepo
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+import pandas as pd
 
-
-# ==========================================
-# STEP 1: Fetch Dataset
-# ==========================================
+# =====================================================
+# STEP 1 : Load Dataset
+# =====================================================
 
 student_performance = fetch_ucirepo(id=320)
 
 features_data = student_performance.data.features
 target_data = student_performance.data.targets
 
+# =====================================================
+# STEP 2 : Feature Selection
+# =====================================================
 
-# ==========================================
-# STEP 2: Select Features
-# ==========================================
+X = features_data[["studytime", "failures", "absences"]].copy()
 
-X = features_data[
-    [
-        "studytime",
-        "failures",
-        "absences"
-    ]
-].copy()
-
-# G1 and G2 are available in target_data
+# Add G1 and G2
 X["G1"] = target_data["G1"]
 X["G2"] = target_data["G2"]
 
-# Final grade G3 is our target
+# Target
 y = target_data["G3"]
 
-
-# ==========================================
-# STEP 3: Display Dataset Information
-# ==========================================
-
-print("Selected Features:")
+print("========== DATASET ==========")
 print(X.head())
-
 print("\nTarget (G3):")
 print(y.head())
+print("\nDataset Shape:", X.shape)
 
-print("\nDataset Shape:")
-print(X.shape)
-
-
-# ==========================================
-# STEP 4: Train-Test Split
-# ==========================================
+# =====================================================
+# STEP 3 : Train-Test Split
+# =====================================================
 
 X_train, X_test, y_train, y_test = train_test_split(
     X,
     y,
-    test_size=0.2,
+    test_size=0.20,
     random_state=42
 )
 
-print("\nTraining Data Shape:")
-print(X_train.shape)
+print("\n========== TRAIN TEST SPLIT ==========")
+print("Training Data :", X_train.shape)
+print("Testing Data  :", X_test.shape)
 
-print("\nTesting Data Shape:")
-print(X_test.shape)
-
-print("\nTraining Target Shape:")
-print(y_train.shape)
-
-print("\nTesting Target Shape:")
-print(y_test.shape)
-
-
-# ==========================================
-# STEP 5: Create Random Forest Model
-# ==========================================
+# =====================================================
+# STEP 4 : Create Random Forest Model
+# =====================================================
 
 model = RandomForestRegressor(
     n_estimators=100,
     random_state=42
 )
 
-
-# ==========================================
-# STEP 6: Train Model
-# ==========================================
+# =====================================================
+# STEP 5 : Train Model
+# =====================================================
 
 model.fit(X_train, y_train)
 
-print("\nModel training completed!")
+print("\nModel Training Completed Successfully!")
+
+# =====================================================
+# STEP 6 : Prediction
+# =====================================================
+
+y_pred = model.predict(X_test)
+
+print("\n========== FIRST 10 PREDICTIONS ==========")
+for actual, pred in zip(y_test.iloc[:10], y_pred[:10]):
+    print(f"Actual: {actual:2} | Predicted: {pred:.2f}")
+
+# =====================================================
+# STEP 7 : Model Evaluation
+# =====================================================
+
+mae = mean_absolute_error(y_test, y_pred)
+mse = mean_squared_error(y_test, y_pred)
+rmse = mse ** 0.5
+r2 = r2_score(y_test, y_pred)
+
+print("\n========== MODEL EVALUATION ==========")
+print(f"MAE       : {mae:.2f}")
+print(f"MSE       : {mse:.2f}")
+print(f"RMSE      : {rmse:.2f}")
+print(f"R2 Score  : {r2:.2f}")
+
+# =====================================================
+# STEP 8 : Sample Student Prediction
+# =====================================================
+
+sample_student = pd.DataFrame({
+    "studytime": [3],
+    "failures": [0],
+    "absences": [4],
+    "G1": [13],
+    "G2": [14]
+})
+
+predicted_grade = model.predict(sample_student)
+
+print("\n========== SAMPLE STUDENT ==========")
+print(sample_student)
+print(f"\nPredicted Final Grade (G3): {predicted_grade[0]:.2f}")
